@@ -5,8 +5,8 @@
 
 由于本项目中使用众多systemctl特性，故墙裂推荐使用ubuntu 16.04 ，Debian 9 和Centos 7 及以上版本！！！
 
-### 已知的问题(截止2020-12-07)
-- ansible中的service模块与内核版本为5.8的linux不兼容，会报`FAILED! => {"changed": false, "msg": "Service is in unknown state", "status": {}}`，建议升级systemd版本或降级Linux内核版本,详情参看:[Service is in unknown state #71528](https://github.com/ansible/ansible/issues/71528)
+### 已知的问题(截止2021-02-01)
+- ansible中的service模块(systemd版本:245.4)与内核版本为5.8的linux不兼容，会报`FAILED! => {"changed": false, "msg": "Service is in unknown state", "status": {}}`，建议内核版本5.8基础上升级systemd版本至245.7及以上或降级Linux内核版本,详情参看:[Service is in unknown state #71528](https://github.com/ansible/ansible/issues/71528) | [ansible fails with systemd 245.4](https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/1899232)
 - 当执行ntp.yml时，若远程机器是ubuntu20.04的系统请将ansible版本升级至2.9.8以上或使用2.10(使用pip3而不是apt安装)，详情参看:[Problems on Ubuntu 20.04 #86](https://github.com/geerlingguy/ansible-role-ntp/issues/86)
 
 项目目录结构
@@ -46,7 +46,10 @@ apt-get install ansible
 yum -y install ansible
 
 #macos
-brew install ansible #没有装brew包管理器的自行百度安装一下
+brew install ansible
+
+# python
+pip3 install ansible
 ```
 
 - 2.将本机的ssh-key全部复制进所有主机中
@@ -60,71 +63,18 @@ git clone https://github.com/Leif160519/ansible-linux
 ```
 
 - 4.修改inventory下的主机hostname和IP地址
-```
-[dist]
-[dist:children] # 发行版 {{{
-dist.debian
-dist.redhat
-# }}}
+> all: 所有机器
+> dist：根据系统版本进行分类
 
-[dist.debian:children] # debian 系 {{{
-dist.ubuntu
-dist.debian9
-dist.debian10
-# }}}
-
-[dist.redhat:children] # redhat子类 {{{1
-dist.centos
-
-[dist.centos:children] # centos子类 {{{2
-dist.centos6
-dist.centos7
-
-[ dist.centos6] # {{{3
-# }}}3
-
-[dist.centos7] # {{{3
-gitlab-server
-# }}}3
-# }}}2
-# }}}1
-
-[dist.ubuntu:children] # ubuntu子类 {{{1
-dist.ubuntu.lts
-
-[dist.ubuntu.lts:children] # ubuntu发行版子类 {{{2
-dist.u1604
-dist.u1804
-dist.u2004
-
-[dist.u1604] # {{{3
-# }}}3
-
-[dist.u1804] # {{{3
-# }}}3
-
-[dist.u2004] # {{{3
-prometheus-server
-ansible-server
-jenkins-server
-nexus-server
-# }}}3
-# }}}2
-# }}}1
-
-[dist.debian9] # {{{
-# }}}
-
-[dist.debian10] # {{{
-# }}}
-```
-
-- 5.ansible配置文件配置忽略组语法错误
+- 5.ansible配置文件(使用pip3安装的ansible不会生成配置文件，可手动创建并配置)
 ```
 vi /etc/ansible/ansible.cfg
 
 [defaults]
-force_valid_group_names = ignore
+force_valid_group_names = ignore     # 忽略语法错误
+roles_path = ansible/roles           # 指定roles绝对路径
+host_key_checking = False            # 禁用检测host key，即首次连接不会提示输入`yes`
+private_key_file = /root/.ssh/id_rsa # 指定ansible用于ssh连接的私钥绝对路径
 ···
 
 ```
@@ -199,6 +149,8 @@ ansible-playbook -u root -i inventory playbooks/vim -e username=<username>
 - [Vim 配置入门](http://www.ruanyifeng.com/blog/2018/09/vimrc.html)
 - [Vim轻量高效插件管理神器vim-plug介绍-Vim插件(9)](https://vimjc.com/vim-plug.html)
 - [Airline & Themes](https://www.bookstack.cn/read/learn-vim/plugins-airline.md)
+- [在vim中配置最新YouCompleteMe代码自动补全插件](https://blog.csdn.net/qq_28584889/article/details/97131637)
+- [vi代码智能提示功能及相关配置](https://www.cnblogs.com/jxhd1/p/7806626.html)
 
 ### 5.2 配置zsh
 - [oh-my-fishy-zsh配置](https://leif.fun/articles/2020/09/02/1599028639385.html)

@@ -57,6 +57,11 @@
             regexp: '^#ClientAliveCountMax'
             line: 'ClientAliveCountMax 60'
 
+        - lineinfile:
+            dest: /etc/ssh/ssh_config
+            regexp: '^#   StrictHostKeyChecking'
+            line: '    StrictHostKeyChecking no'
+
         - blockinfile:
             path: /etc/ssh/ssh_config
             block: |2
@@ -125,15 +130,21 @@
         - file:
             path: ~{{ username }}/.pip
             state: directory
+            owner: "{{ username }}"
+            group: "{{ username }}"
             mode: 0755
 
         - file:
             path: ~{{ username }}/.pip/pip.conf
             state: touch
+            owner: "{{ username }}"
+            group: "{{ username }}"
             mode: 0755
 
         - blockinfile:
             path: ~{{ username }}/.pip/pip.conf
+            owner: "{{ username }}"
+            group: "{{ username }}"
             block: |
               [global]
               index-url = http://mirrors.aliyun.com/pypi/simple/
@@ -158,6 +169,8 @@
       lineinfile:
         path: ~{{ username }}/.bashrc
         line: 'export HISTTIMEFORMAT="%F %T "'
+        owner: "{{ username }}"
+        group: "{{ username }}"
       # }}}
 
     - name: 打开cron日志 # {{{
